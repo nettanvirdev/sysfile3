@@ -16,8 +16,9 @@ pub struct Config {
     pub max_text_bytes: u64,
     /// Versions kept per file, the current one included. Older ones are deleted on write.
     pub max_versions: u32,
-    /// Quotas given to a workspace when it is first opened. `None` is unlimited.
+    /// Bytes allowed in a new workspace. `None` is unlimited.
     pub default_quota_bytes: Option<u64>,
+    /// Files and folders allowed in a new workspace. `None` is unlimited.
     pub default_quota_nodes: Option<u64>,
     /// Most entries `list` returns per page.
     pub list_limit: usize,
@@ -33,8 +34,9 @@ pub struct Config {
     pub cache_item_bytes: u64,
     /// A cached file is dropped after going unread this long; every read renews it.
     pub cache_idle: Duration,
-    /// How long signed upload and download URLs stay valid.
+    /// How long a direct-upload ticket and its URL stay valid.
     pub upload_ttl: Duration,
+    /// How long `download_url` links stay valid.
     pub download_ttl: Duration,
 }
 

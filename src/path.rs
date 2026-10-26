@@ -27,10 +27,12 @@ pub const MAX_DEPTH: usize = 64;
 pub struct VPath(String);
 
 impl VPath {
+    /// The root, `/`.
     pub fn root() -> Self {
         VPath("/".into())
     }
 
+    /// Normalize and validate a path; see the type docs for the rules.
     pub fn parse(input: &str) -> Result<Self> {
         if input.len() > MAX_PATH_BYTES {
             return Err(Error::InvalidPath(format!("longer than {MAX_PATH_BYTES} bytes")));
@@ -64,10 +66,12 @@ impl VPath {
         VPath(path)
     }
 
+    /// The normalized path, such as `/notes/todo.md`.
     pub fn as_str(&self) -> &str {
         &self.0
     }
 
+    /// True for `/`.
     pub fn is_root(&self) -> bool {
         self.0 == "/"
     }
@@ -82,6 +86,7 @@ impl VPath {
         if self.is_root() { None } else { self.0.rsplit('/').next() }
     }
 
+    /// The containing folder; `None` for the root.
     pub fn parent(&self) -> Option<VPath> {
         if self.is_root() {
             return None;

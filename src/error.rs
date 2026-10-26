@@ -22,42 +22,78 @@ impl fmt::Display for Quota {
 /// handle's root), so an error never reveals folders outside what the caller may see.
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    /// No such file, folder, version, trash item or upload.
     #[error("not found: {0}")]
     NotFound(String),
+    /// The path is taken.
     #[error("already exists: {0}")]
     AlreadyExists(String),
+    /// A folder was needed but this is a file.
     #[error("not a folder: {0}")]
     NotADirectory(String),
+    /// A file was needed but this is a folder.
     #[error("is a folder: {0}")]
     IsADirectory(String),
+    /// Deleting or replacing a folder that has something in it.
     #[error("folder is not empty: {0}")]
     NotEmpty(String),
+    /// The file changed since the version the caller named.
     #[error("{path} changed: expected version {expected}, found {actual}")]
-    Conflict { path: String, expected: i32, actual: i32 },
+    Conflict {
+        /// The file.
+        path: String,
+        /// The version the caller expected.
+        expected: i32,
+        /// The version it is now.
+        actual: i32,
+    },
+    /// The write would go over the workspace's limit; nothing was stored.
     #[error("{0}")]
     QuotaExceeded(Quota),
+    /// Over a size limit from [`Config`](crate::Config).
     #[error("too large: {size} bytes, the limit is {limit}")]
-    TooLarge { size: u64, limit: u64 },
+    TooLarge {
+        /// The size asked for.
+        size: u64,
+        /// The limit.
+        limit: u64,
+    },
+    /// A text operation on a binary file.
     #[error("not a text file: {0}")]
     NotText(String),
+    /// The text to replace is not in the file.
     #[error("the text to replace was not found in {0}")]
     EditNotFound(String),
+    /// The text to replace appears more than once and `replace_all` was not set.
     #[error("the text to replace appears {count} times in {path}; include more context or replace all")]
-    EditAmbiguous { path: String, count: usize },
+    EditAmbiguous {
+        /// The file.
+        path: String,
+        /// How many times the text appears.
+        count: usize,
+    },
+    /// A path that breaks the rules (`..`, control characters, too long, too deep).
     #[error("invalid path: {0}")]
     InvalidPath(String),
+    /// A bad argument.
     #[error("invalid input: {0}")]
     InvalidInput(String),
+    /// The handle may not do this.
     #[error("not allowed: {0}")]
     PermissionDenied(&'static str),
+    /// The link does not exist, expired, was revoked, or its file is in the trash.
     #[error("this link does not exist, has expired or was revoked")]
     ShareNotFound,
+    /// Not available in this setup (for example signed URLs without a signer).
     #[error("not supported: {0}")]
     Unsupported(&'static str),
+    /// Postgres failed.
     #[error("database error: {0}")]
     Database(#[from] sqlx::Error),
+    /// Object storage failed.
     #[error("storage error: {0}")]
     Storage(#[from] object_store::Error),
+    /// Reading the caller's upload stream failed.
     #[error("reading the upload failed: {0}")]
     Io(#[from] std::io::Error),
 }
@@ -98,4 +134,5 @@ impl Error {
     }
 }
 
+/// The result of every sysfile3 call.
 pub type Result<T, E = Error> = std::result::Result<T, E>;

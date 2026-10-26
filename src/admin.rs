@@ -38,6 +38,7 @@ impl Sysfile3 {
         Ok(usage)
     }
 
+    /// A workspace's usage and limits, by app and external id (no handle needed).
     pub async fn usage(&self, app: &str, external_id: &str) -> Result<Usage> {
         let id = self.workspace_id(app, external_id).await?;
         let mut tx = db::begin(&self.inner.pool, Scope::Workspace(id)).await?;

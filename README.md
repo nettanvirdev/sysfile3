@@ -31,8 +31,20 @@ let link = ws.share("/sites/launch", None).await?;
 let public = fs.open_share(&link.token).await?; // read-only, confined to /sites/launch
 ```
 
+**New here?** The **[guide](https://github.com/nettanvirdev/sysfile3/blob/main/docs/guide.md)** walks through every feature step by step, from setup to
+quotas, sharing and maintenance, and [`examples/tour.rs`](https://github.com/nettanvirdev/sysfile3/blob/main/examples/tour.rs)
+runs all of it against a real Postgres:
+
+```sh
+docker run --rm -d --name sf3-demo -e POSTGRES_PASSWORD=demo -p 55433:5432 postgres:17-alpine
+DATABASE_URL=postgres://postgres:demo@127.0.0.1:55433/postgres cargo run --example tour
+```
+
+API reference: [docs.rs/sysfile3](https://docs.rs/sysfile3).
+
 ## Contents
 
+- [Guide (every feature, step by step)](https://github.com/nettanvirdev/sysfile3/blob/main/docs/guide.md)
 - [What it is for](#what-it-is-for)
 - [Features](#features)
 - [Getting started](#getting-started)
@@ -80,7 +92,7 @@ and counted against the user's quota.
 
 ```toml
 [dependencies]
-sysfile3 = "0.1"
+sysfile3 = "0.2"
 object_store = { version = "0.14", features = ["aws"] }
 sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "postgres"] }
 ```

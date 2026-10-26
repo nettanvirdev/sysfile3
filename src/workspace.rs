@@ -38,13 +38,16 @@ pub enum Expect {
     Version(i32),
 }
 
+/// Options for `write`, `write_stream` and uploads.
 #[derive(Debug, Clone, Default)]
 pub struct WriteOptions {
+    /// When the write may happen; see [`Expect`].
     pub expect: Expect,
     /// Content type. Guessed from the file name when not given on creation; kept on overwrite.
     pub mime: Option<String>,
 }
 
+/// Options for `list`.
 #[derive(Debug, Clone)]
 pub struct ListOptions {
     /// Levels to descend: 1 lists the folder's own children.
@@ -64,14 +67,20 @@ impl Default for ListOptions {
 /// The edits for one file in `edit_many`.
 #[derive(Debug, Clone)]
 pub struct FileEdits {
+    /// The file to edit.
     pub path: String,
+    /// Its edits, applied in order.
     pub edits: Vec<Edit>,
+    /// When the edit may happen; see [`Expect`].
     pub expect: Expect,
 }
 
+/// The result of an edit.
 #[derive(Debug, Clone)]
 pub struct EditOutcome {
+    /// The file after the edit.
     pub entry: Entry,
+    /// Replacements made.
     pub replacements: usize,
 }
 
@@ -106,10 +115,12 @@ impl Content {
 }
 
 impl Workspace {
+    /// The workspace id (stable, internal).
     pub fn id(&self) -> Uuid {
         self.id
     }
 
+    /// What this handle may do and where.
     pub fn access(&self) -> &Access {
         &self.access
     }
@@ -228,6 +239,7 @@ impl Workspace {
 
     // ---- reading -------------------------------------------------------------------------
 
+    /// A file or folder.
     pub async fn stat(&self, path: &str) -> Result<Entry> {
         self.need_read()?;
         let abs = self.abs(path)?;
@@ -238,6 +250,7 @@ impl Workspace {
         }
     }
 
+    /// Whether a path exists.
     pub async fn exists(&self, path: &str) -> Result<bool> {
         match self.stat(path).await {
             Ok(_) => Ok(true),
@@ -361,6 +374,7 @@ impl Workspace {
         self.inner.blobs.signed_url(Method::GET, self.id, row.blob_id.expect("files have a blob"), ttl).await
     }
 
+    /// The workspace's stored bytes, file count and limits (for the whole workspace, even on a confined handle).
     pub async fn usage(&self) -> Result<Usage> {
         let mut tx = self.tx().await?;
         let usage = usage_of(&mut tx, self.id).await?;

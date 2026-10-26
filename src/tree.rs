@@ -378,6 +378,7 @@ impl Workspace {
             .collect())
     }
 
+    /// The contents of one kept version, up to `Config::max_inline_bytes`.
     pub async fn read_version(&self, path: &str, version: i32) -> Result<Bytes> {
         self.need_read()?;
         let abs = self.abs(path)?;

@@ -5,16 +5,21 @@ use crate::error::{Error, Result};
 /// Replace `old` with `new`. `old` must appear exactly once unless `replace_all` is set.
 #[derive(Debug, Clone)]
 pub struct Edit {
+    /// The exact text to find. Must not be empty.
     pub old: String,
+    /// What to put in its place. Must differ from `old`.
     pub new: String,
+    /// Replace every occurrence instead of requiring exactly one.
     pub replace_all: bool,
 }
 
 impl Edit {
+    /// Replace `old` with `new`, which must appear exactly once.
     pub fn new(old: impl Into<String>, new: impl Into<String>) -> Self {
         Edit { old: old.into(), new: new.into(), replace_all: false }
     }
 
+    /// Replace every occurrence of `old` with `new`.
     pub fn all(old: impl Into<String>, new: impl Into<String>) -> Self {
         Edit { old: old.into(), new: new.into(), replace_all: true }
     }

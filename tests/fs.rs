@@ -673,7 +673,7 @@ async fn storage_usage_everywhere() {
 
     // A project (folder) size, like `du`.
     let a = ws.disk_usage("/proj-a").await.unwrap();
-    assert_eq!(a, sysfile3::FolderUsage { files: 3, folders: 1, bytes: 3000 + 2000 + 11 });
+    assert_eq!(a, sysfile3::FolderUsage { files: 3, folders: 0, bytes: 3000 + 2000 + 11 });
     let one = ws.disk_usage("/proj-b/clip.mp4").await.unwrap();
     assert_eq!((one.files, one.bytes), (1, 10_000));
     let all = ws.disk_usage("/").await.unwrap();

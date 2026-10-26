@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.1
+
+- A step-by-step guide to every feature (`docs/guide.md`) and a runnable tour of all of it
+  (`examples/tour.rs`).
+- Every public item is documented on docs.rs.
+- `disk_usage` counts the folders inside a folder, not the folder itself.
+
 ## 0.2.0
 
 - Storage usage everywhere: `disk_usage` (size of a folder or project), `breakdown` (current

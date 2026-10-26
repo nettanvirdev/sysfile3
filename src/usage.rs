@@ -13,10 +13,12 @@ const MIB: f64 = 1024.0 * 1024.0;
 const GIB: f64 = MIB * 1024.0;
 
 impl Usage {
+    /// Used bytes in MiB.
     pub fn used_mib(&self) -> f64 {
         self.used_bytes as f64 / MIB
     }
 
+    /// Used bytes in GiB.
     pub fn used_gib(&self) -> f64 {
         self.used_bytes as f64 / GIB
     }
@@ -39,12 +41,14 @@ impl Usage {
 }
 
 impl AppUsage {
+    /// Stored bytes in GiB.
     pub fn used_gib(&self) -> f64 {
         self.used_bytes as f64 / GIB
     }
 }
 
 impl FolderUsage {
+    /// Bytes in MiB.
     pub fn mib(&self) -> f64 {
         self.bytes as f64 / MIB
     }
@@ -78,8 +82,9 @@ pub fn category(mime: &str) -> &'static str {
 }
 
 impl Workspace {
-    /// Size of a folder (or a single file) as it is now: its files, its folders and the bytes of
-    /// their current contents. Old versions and the trash are not included; see `breakdown`.
+    /// Size of a folder (or a single file) as it is now: the files and folders inside it and the
+    /// bytes of their current contents. Old versions and the trash are not included; see
+    /// `breakdown`.
     pub async fn disk_usage(&self, path: &str) -> Result<FolderUsage> {
         self.need_read()?;
         let abs = self.abs(path)?;
@@ -89,7 +94,7 @@ impl Workspace {
         }
         let (lo, hi) = abs.subtree();
         let (files, folders, bytes): (i64, i64, i64) = sqlx::query_as(
-            "SELECT count(*) FILTER (WHERE kind = 'file'), count(*) FILTER (WHERE kind = 'dir'),
+            "SELECT count(*) FILTER (WHERE kind = 'file'), count(*) FILTER (WHERE kind = 'dir' AND path <> $2),
                     coalesce(sum(size), 0)::bigint
              FROM sf3_nodes
              WHERE workspace_id = $1 AND trash_id IS NULL AND (path = $2 OR (path >= $3 AND path < $4))",

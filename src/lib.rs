@@ -18,7 +18,10 @@
 //! # Ok(()) }
 //! ```
 //!
-//! See the README for the design: isolation, quotas, versions, trash, shares and caching.
+//! The [guide](https://github.com/nettanvirdev/sysfile3/blob/main/docs/guide.md) walks through
+//! every feature with examples; the README covers the design.
+
+#![warn(missing_docs)]
 
 mod admin;
 mod config;
@@ -95,18 +98,22 @@ impl Access {
         self
     }
 
+    /// Whether the handle may read.
     pub fn can_read(&self) -> bool {
         self.read
     }
 
+    /// Whether the handle may write, move and delete.
     pub fn can_write(&self) -> bool {
         self.write
     }
 
+    /// Whether the handle may create and revoke public links.
     pub fn can_share(&self) -> bool {
         self.share
     }
 
+    /// The folder the handle is confined to (`/` for the whole workspace).
     pub fn root(&self) -> &VPath {
         &self.root
     }
@@ -127,6 +134,7 @@ pub struct Sysfile3 {
     pub(crate) inner: Arc<Inner>,
 }
 
+/// Builds a [`Sysfile3`]; start with [`Sysfile3::builder`].
 pub struct Builder {
     pool: PgPool,
     store: Arc<dyn ObjectStore>,
@@ -135,6 +143,7 @@ pub struct Builder {
 }
 
 impl Builder {
+    /// Limits and tuning; see [`Config`].
     pub fn config(mut self, cfg: Config) -> Self {
         self.cfg = cfg;
         self
@@ -147,6 +156,7 @@ impl Builder {
         self
     }
 
+    /// Finish building. Call [`Sysfile3::migrate`] once before use.
     pub fn build(self) -> Sysfile3 {
         let blobs = Blobs::new(self.store, self.signer, &self.cfg);
         Sysfile3 {
@@ -161,10 +171,12 @@ impl Builder {
 }
 
 impl Sysfile3 {
+    /// Start building from a Postgres pool and an object store (R2, S3, MinIO, memory).
     pub fn builder(pool: PgPool, store: Arc<dyn ObjectStore>) -> Builder {
         Builder { pool, store, signer: None, cfg: Config::default() }
     }
 
+    /// The limits in effect.
     pub fn config(&self) -> &Config {
         &self.inner.cfg
     }

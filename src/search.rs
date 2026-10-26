@@ -14,6 +14,7 @@ use crate::workspace::Workspace;
 /// Longest matching line returned by `grep`, in characters.
 const MAX_LINE_CHARS: usize = 400;
 
+/// What `grep` looks for and where.
 #[derive(Debug, Clone)]
 pub struct GrepOptions {
     /// A regular expression (Rust `regex` syntax; always linear time).
@@ -23,12 +24,14 @@ pub struct GrepOptions {
     /// Only files matching this glob: against the name when it has no `/` (`*.md`), against
     /// the path under `under` otherwise (`docs/**/*.md`).
     pub include: Option<String>,
+    /// Match regardless of letter case.
     pub ignore_case: bool,
     /// At most this many matches, and never more than `Config::grep_max_matches`.
     pub max_matches: Option<usize>,
 }
 
 impl GrepOptions {
+    /// Search everything for `pattern`, with the other options at their defaults.
     pub fn new(pattern: impl Into<String>) -> Self {
         GrepOptions { pattern: pattern.into(), under: "/".into(), include: None, ignore_case: false, max_matches: None }
     }
