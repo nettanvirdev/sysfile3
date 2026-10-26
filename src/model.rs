@@ -93,6 +93,51 @@ pub struct Usage {
     pub quota_nodes: Option<u64>,
 }
 
+/// The size of a folder (or file) as it is now, without old versions or the trash.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FolderUsage {
+    pub files: u64,
+    pub folders: u64,
+    pub bytes: u64,
+}
+
+/// Bytes and files of one storage category ("images", "videos", "audio", "documents",
+/// "text", "archives", "other").
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct TypeUsage {
+    pub category: String,
+    pub files: u64,
+    pub bytes: u64,
+}
+
+/// Where a workspace's space goes, for storage screens and cleanup prompts.
+#[derive(Debug, Clone)]
+pub struct Breakdown {
+    /// The workspace's billed usage and limits (contents shared by copies count once).
+    pub usage: Usage,
+    pub files: u64,
+    pub folders: u64,
+    /// Current contents of every file.
+    pub file_bytes: u64,
+    /// Kept versions older than the current one, and their bytes.
+    pub old_versions: u64,
+    pub version_bytes: u64,
+    /// Deleted items waiting in the trash, the files in them, and their bytes.
+    pub trash_items: u64,
+    pub trashed_files: u64,
+    pub trash_bytes: u64,
+    /// Current files by category, largest first.
+    pub by_type: Vec<TypeUsage>,
+}
+
+/// Totals across every workspace of an app.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct AppUsage {
+    pub workspaces: u64,
+    pub used_bytes: u64,
+    pub node_count: u64,
+}
+
 #[derive(Debug, Clone)]
 pub struct ShareInfo {
     pub id: Uuid,

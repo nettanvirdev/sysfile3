@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 470" width="960" height="470" role="img" aria-labelledby="t d">
+  <title id="t">How sysfile3 fits together</title>
+  <desc id="d">Your app, AI agents and public links reach files through sysfile3, which keeps the tree in Postgres and the bytes in S3-compatible storage. Large files go straight between clients and storage with signed URLs.</desc>
+  <style>
+    .root { --surface:#fcfcfb; --panel:#ffffff; --line:#d9d8d3; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8984; --accent:#2a78d6; --accent-soft:#e8f1fc; --chip:#f3f2ef; }
+    @media (prefers-color-scheme: dark) {
+      .root { --surface:#1a1a19; --panel:#232322; --line:#3a3a37; --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8e86; --accent:#3987e5; --accent-soft:#1d2a3b; --chip:#2c2c2a; }
+    }
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; fill: var(--ink); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .h { font-size: 17px; font-weight: 650; }
+    .s { font-size: 13px; fill: var(--ink2); }
+    .k { font-size: 11px; letter-spacing: .12em; fill: var(--muted); }
+    .chip { font-size: 13px; font-weight: 550; }
+    .box { fill: var(--panel); stroke: var(--line); stroke-width: 1.5; }
+    .core { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+    .chipbg { fill: var(--panel); stroke: var(--line); stroke-width: 1; }
+    .wire { stroke: var(--ink2); stroke-width: 2; fill: none; }
+    .direct { stroke: var(--accent); stroke-width: 2; fill: none; stroke-dasharray: 6 6; }
+    .arrow { fill: var(--ink2); }
+    .arrowA { fill: var(--accent); }
+  </style>
+  <g class="root">
+    <rect width="960" height="470" rx="16" fill="var(--surface)"/>
+
+    <!-- Callers -->
+    <text x="34" y="40" class="k mono">WHO CALLS</text>
+    <rect class="box" x="24" y="56" width="230" height="84" rx="10"/>
+    <text x="42" y="90" class="h">Your app</text>
+    <text x="42" y="114" class="s">API servers, workers, jobs</text>
+
+    <rect class="box" x="24" y="160" width="230" height="84" rx="10"/>
+    <text x="42" y="194" class="h">AI agents</text>
+    <text x="42" y="218" class="s">read · write · edit · grep</text>
+
+    <rect class="box" x="24" y="264" width="230" height="84" rx="10"/>
+    <text x="42" y="298" class="h">Public links</text>
+    <text x="42" y="322" class="s">read-only, expiring</text>
+
+    <!-- Callers to core -->
+    <path class="wire" d="M254 98 H 300"/>
+    <path class="wire" d="M254 202 H 300"/>
+    <path class="wire" d="M254 306 H 300"/>
+    <path class="arrow" d="M300 92 l10 6 -10 6z"/>
+    <path class="arrow" d="M300 196 l10 6 -10 6z"/>
+    <path class="arrow" d="M300 300 l10 6 -10 6z"/>
+
+    <!-- Core -->
+    <rect class="core" x="314" y="40" width="334" height="324" rx="14"/>
+    <text x="336" y="76" class="mono" style="font-size:22px;font-weight:700;fill:var(--accent)">sysfile3</text>
+    <text x="336" y="100" class="s">one scoped handle per workspace</text>
+
+    <g>
+      <rect class="chipbg" x="334" y="120" width="146" height="40" rx="8"/><text x="350" y="145" class="chip">Workspaces + RLS</text>
+      <rect class="chipbg" x="490" y="120" width="140" height="40" rx="8"/><text x="506" y="145" class="chip">Scoped access</text>
+      <rect class="chipbg" x="334" y="170" width="146" height="40" rx="8"/><text x="350" y="195" class="chip">Versions</text>
+      <rect class="chipbg" x="490" y="170" width="140" height="40" rx="8"/><text x="506" y="195" class="chip">Trash + restore</text>
+      <rect class="chipbg" x="334" y="220" width="146" height="40" rx="8"/><text x="350" y="245" class="chip">Exact quotas</text>
+      <rect class="chipbg" x="490" y="220" width="140" height="40" rx="8"/><text x="506" y="245" class="chip">Share links</text>
+      <rect class="chipbg" x="334" y="270" width="146" height="40" rx="8"/><text x="350" y="295" class="chip">glob + grep</text>
+      <rect class="chipbg" x="490" y="270" width="140" height="40" rx="8"/><text x="506" y="295" class="chip">Content cache</text>
+    </g>
+    <text x="336" y="342" class="s">edits pinned to versions · every write atomic</text>
+
+    <!-- Core to stores -->
+    <path class="wire" d="M648 124 H 704"/>
+    <path class="arrow" d="M704 118 l10 6 -10 6z"/>
+    <path class="wire" d="M648 280 H 704"/>
+    <path class="arrow" d="M704 274 l10 6 -10 6z"/>
+
+    <!-- Stores -->
+    <text x="728" y="40" class="k mono">WHERE IT LIVES</text>
+    <rect class="box" x="718" y="56" width="218" height="136" rx="10"/>
+    <text x="736" y="90" class="h">Postgres</text>
+    <text x="736" y="116" class="s">the tree: paths, versions,</text>
+    <text x="736" y="136" class="s">trash, quotas, links</text>
+    <text x="736" y="170" class="k mono">TRUTH</text>
+
+    <rect class="box" x="718" y="212" width="218" height="136" rx="10"/>
+    <text x="736" y="246" class="h">S3 · R2 · MinIO</text>
+    <text x="736" y="272" class="s">the bytes, written once</text>
+    <text x="736" y="292" class="s">and never rewritten</text>
+    <text x="736" y="326" class="k mono">CONTENT</text>
+
+    <!-- Direct path for large files -->
+    <path class="direct" d="M139 348 V 412 Q 139 428 155 428 H 811 Q 827 428 827 412 V 362"/>
+    <path class="arrowA" d="M821 362 l6 -10 6 10z"/>
+    <text x="480" y="452" class="s" text-anchor="middle">large files go straight between clients and storage through signed URLs</text>
+  </g>
+</svg>

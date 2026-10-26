@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 854" width="960" height="854" role="img" aria-labelledby="t d">
+  <title id="t">sysfile3 throughput per tool</title>
+  <desc id="d">Operations per second for each tool with 200 workspaces and 64 concurrent callers on Postgres 17: stat 6127, usage 6089, read 1 KiB (cached) 6070, read_text 5869, list 4485, disk_usage 4636, glob 4325, versions 2958, mkdir -p 2847, grep 2789, rename 2533, write 1 KiB 1775, share + open + read 1733, edit 1676, write 256 KiB 1361, delete + restore 1278, copy (10-file folder) 793, breakdown 660, write_stream 4 MiB 231. Against a store with 40 ms reads, small reads run at 1024 per second without the cache and 5735 with it.</desc>
+  <style>
+    .root { --surface:#fcfcfb; --ink:#0b0b0b; --ink2:#52514e; --muted:#8a8984; --grid:#e7e6e1; --series:#2a78d6; }
+    @media (prefers-color-scheme: dark) {
+      .root { --surface:#1a1a19; --ink:#f0efec; --ink2:#c3c2b7; --muted:#8f8e86; --grid:#2f2f2d; --series:#3987e5; }
+    }
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+    .title { font-size: 18px; font-weight: 650; fill: var(--ink); }
+    .sub { font-size: 13px; fill: var(--ink2); }
+    .label { font-size: 13px; fill: var(--ink2); font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .value { font-size: 12.5px; font-weight: 600; fill: var(--ink); font-variant-numeric: tabular-nums; }
+    .axis { font-size: 11px; fill: var(--muted); font-variant-numeric: tabular-nums; }
+    .grid { stroke: var(--grid); stroke-width: 1; }
+    .base { stroke: var(--muted); stroke-width: 1.5; }
+    .bar { fill: var(--series); }
+  </style>
+  <g class="root">
+    <rect width="960" height="854" rx="16" fill="var(--surface)"/>
+    <text class="title" x="32" y="44">Operations per second, by tool</text>
+    <text class="sub" x="32" y="66">200 workspaces · 64 concurrent callers · Postgres 17 in Docker Desktop · zero errors</text>
+    <line class="grid" x1="210.0" y1="106" x2="210.0" y2="642"/>
+    <text class="axis" x="210.0" y="98" text-anchor="middle">0</text>
+    <line class="grid" x1="308.6" y1="106" x2="308.6" y2="642"/>
+    <line class="grid" x1="407.1" y1="106" x2="407.1" y2="642"/>
+    <text class="axis" x="407.1" y="98" text-anchor="middle">2,000</text>
+    <line class="grid" x1="505.7" y1="106" x2="505.7" y2="642"/>
+    <line class="grid" x1="604.3" y1="106" x2="604.3" y2="642"/>
+    <text class="axis" x="604.3" y="98" text-anchor="middle">4,000</text>
+    <line class="grid" x1="702.9" y1="106" x2="702.9" y2="642"/>
+    <line class="grid" x1="801.4" y1="106" x2="801.4" y2="642"/>
+    <text class="axis" x="801.4" y="98" text-anchor="middle">6,000</text>
+    <line class="grid" x1="900.0" y1="106" x2="900.0" y2="642"/>
+    <text class="label" x="196" y="129" text-anchor="end">stat</text>
+    <path class="bar" d="M210 116 H809.9 Q813.9 116 813.9 120 V128 Q813.9 132 809.9 132 H210 Z"/>
+    <text class="value" x="821.9" y="129">6,127</text>
+    <text class="label" x="196" y="157" text-anchor="end">usage</text>
+    <path class="bar" d="M210 144 H806.2 Q810.2 144 810.2 148 V156 Q810.2 160 806.2 160 H210 Z"/>
+    <text class="value" x="818.2" y="157">6,089</text>
+    <text class="label" x="196" y="185" text-anchor="end">read 1 KiB (cached)</text>
+    <path class="bar" d="M210 172 H804.3 Q808.3 172 808.3 176 V184 Q808.3 188 804.3 188 H210 Z"/>
+    <text class="value" x="816.3" y="185">6,070</text>
+    <text class="label" x="196" y="213" text-anchor="end">read_text</text>
+    <path class="bar" d="M210 200 H784.5 Q788.5 200 788.5 204 V212 Q788.5 216 784.5 216 H210 Z"/>
+    <text class="value" x="796.5" y="213">5,869</text>
+    <text class="label" x="196" y="241" text-anchor="end">list</text>
+    <path class="bar" d="M210 228 H648.1 Q652.1 228 652.1 232 V240 Q652.1 244 648.1 244 H210 Z"/>
+    <text class="value" x="660.1" y="241">4,485</text>
+    <text class="label" x="196" y="269" text-anchor="end">disk_usage</text>
+    <path class="bar" d="M210 256 H663.0 Q667.0 256 667.0 260 V268 Q667.0 272 663.0 272 H210 Z"/>
+    <text class="value" x="675.0" y="269">4,636</text>
+    <text class="label" x="196" y="297" text-anchor="end">glob</text>
+    <path class="bar" d="M210 284 H632.3 Q636.3 284 636.3 288 V296 Q636.3 300 632.3 300 H210 Z"/>
+    <text class="value" x="644.3" y="297">4,325</text>
+    <text class="label" x="196" y="325" text-anchor="end">versions</text>
+    <path class="bar" d="M210 312 H497.6 Q501.6 312 501.6 316 V324 Q501.6 328 497.6 328 H210 Z"/>
+    <text class="value" x="509.6" y="325">2,958</text>
+    <text class="label" x="196" y="353" text-anchor="end">mkdir -p</text>
+    <path class="bar" d="M210 340 H486.6 Q490.6 340 490.6 344 V352 Q490.6 356 486.6 356 H210 Z"/>
+    <text class="value" x="498.6" y="353">2,847</text>
+    <text class="label" x="196" y="381" text-anchor="end">grep</text>
+    <path class="bar" d="M210 368 H480.9 Q484.9 368 484.9 372 V380 Q484.9 384 480.9 384 H210 Z"/>
+    <text class="value" x="492.9" y="381">2,789</text>
+    <text class="label" x="196" y="409" text-anchor="end">rename</text>
+    <path class="bar" d="M210 396 H455.7 Q459.7 396 459.7 400 V408 Q459.7 412 455.7 412 H210 Z"/>
+    <text class="value" x="467.7" y="409">2,533</text>
+    <text class="label" x="196" y="437" text-anchor="end">write 1 KiB</text>
+    <path class="bar" d="M210 424 H381.0 Q385.0 424 385.0 428 V436 Q385.0 440 381.0 440 H210 Z"/>
+    <text class="value" x="393.0" y="437">1,775</text>
+    <text class="label" x="196" y="465" text-anchor="end">share + open + read</text>
+    <path class="bar" d="M210 452 H376.8 Q380.8 452 380.8 456 V464 Q380.8 468 376.8 468 H210 Z"/>
+    <text class="value" x="388.8" y="465">1,733</text>
+    <text class="label" x="196" y="493" text-anchor="end">edit</text>
+    <path class="bar" d="M210 480 H371.2 Q375.2 480 375.2 484 V492 Q375.2 496 371.2 496 H210 Z"/>
+    <text class="value" x="383.2" y="493">1,676</text>
+    <text class="label" x="196" y="521" text-anchor="end">write 256 KiB</text>
+    <path class="bar" d="M210 508 H340.2 Q344.2 508 344.2 512 V520 Q344.2 524 340.2 524 H210 Z"/>
+    <text class="value" x="352.2" y="521">1,361</text>
+    <text class="label" x="196" y="549" text-anchor="end">delete + restore</text>
+    <path class="bar" d="M210 536 H332.0 Q336.0 536 336.0 540 V548 Q336.0 552 332.0 552 H210 Z"/>
+    <text class="value" x="344.0" y="549">1,278</text>
+    <text class="label" x="196" y="577" text-anchor="end">copy (10-file folder)</text>
+    <path class="bar" d="M210 564 H284.2 Q288.2 564 288.2 568 V576 Q288.2 580 284.2 580 H210 Z"/>
+    <text class="value" x="296.2" y="577">793</text>
+    <text class="label" x="196" y="605" text-anchor="end">breakdown</text>
+    <path class="bar" d="M210 592 H271.1 Q275.1 592 275.1 596 V604 Q275.1 608 271.1 608 H210 Z"/>
+    <text class="value" x="283.1" y="605">660</text>
+    <text class="label" x="196" y="633" text-anchor="end">write_stream 4 MiB</text>
+    <path class="bar" d="M210 620 H228.8 Q232.8 620 232.8 624 V632 Q232.8 636 228.8 636 H210 Z"/>
+    <text class="value" x="240.8" y="633">231</text>
+    <line class="base" x1="210" y1="106" x2="210" y2="642"/>
+    <text class="title" x="32" y="712">Small reads against a remote store (40 ms per object read)</text>
+    <text class="sub" x="32" y="734">the cache keeps hot files in memory; contents never change, so it is never stale</text>
+    <text class="label" x="196" y="771" text-anchor="end">no cache</text>
+    <path class="bar" d="M210 758 H306.9 Q310.9 758 310.9 762 V770 Q310.9 774 306.9 774 H210 Z"/>
+    <text class="value" x="318.9" y="771">1,024 ops/s</text>
+    <text class="label" x="196" y="799" text-anchor="end">cache warm</text>
+    <path class="bar" d="M210 786 H771.3 Q775.3 786 775.3 790 V798 Q775.3 802 771.3 802 H210 Z"/>
+    <text class="value" x="783.3" y="799">5,735 ops/s</text>
+    <line class="base" x1="210" y1="752" x2="210" y2="808"/>
+  </g>
+</svg>

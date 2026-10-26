@@ -7,6 +7,10 @@ holds the bytes. Every user, team or project gets a workspace that nothing else 
 and agents get the file tools they expect (`read`, `write`, `edit`, `ls`, `glob`, `grep`, `mv`,
 `cp`, `rm`) without ever touching a real disk.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nettanvirdev/sysfile3/main/docs/assets/architecture.svg" alt="Your app, AI agents and public links reach files through sysfile3, which keeps the tree in Postgres and the bytes in S3-compatible storage; large files go straight between clients and storage through signed URLs." width="900">
+</p>
+
 ```rust
 use sysfile3::{Access, Edit, Expect, Sysfile3};
 
@@ -69,13 +73,14 @@ and counted against the user's quota.
 | **Large files** | Streamed multipart writes, ranged and streamed reads, and signed direct upload/download URLs, so big files never pass through your servers. |
 | **Search** | `glob` (`**/*.pdf`) and `grep` (linear-time regex, include filters, binary detection). |
 | **Caching** | Small file contents are cached in memory. Contents are immutable by design, so the cache is never stale and never needs invalidating. |
+| **Storage usage** | Billed usage with quota helpers (MiB, GiB, remaining, percent), the size of any folder or project, a breakdown into current files, old versions and trash, storage by type (images, videos, audio, documents, text, archives), the largest files, and totals across an app. |
 | **Maintenance** | Purge old trash, expire unfinished uploads, sweep orphaned objects, delete a whole workspace, usage reports for billing. |
 
 ## Getting started
 
 ```toml
 [dependencies]
-sysfile3 = { git = "https://github.com/nettanvirdev/sysfile3" }
+sysfile3 = "0.1"
 object_store = { version = "0.14", features = ["aws"] }
 sqlx = { version = "0.9", default-features = false, features = ["runtime-tokio", "postgres"] }
 ```
@@ -156,6 +161,37 @@ sysfile3 enforces limits and measures usage; prices, plans and invoices stay in 
 | `set_quota(app, id, bytes, files)`; writes over it fail with `QuotaExceeded` | decides each plan's limits, sets them on signup and upgrade |
 | `usage(...)`, `usage_report(app, after, limit)` | turns usage into money |
 
+### Storage usage
+
+A workspace is whatever you make it: a user, a team or a project. A folder inside one can be a
+project too. Every level has its numbers:
+
+```rust
+// The workspace: what quotas and billing use.
+let u = ws.usage().await?;                     // or fs.usage(app, id) from the server side
+println!("{:.1} MiB used, {:?}% of plan", u.used_mib(), u.used_percent());
+u.remaining_bytes();                           // Some(bytes left) or None when unlimited
+
+// A folder or project, like `du`: files, folders and bytes as they are now.
+let p = ws.disk_usage("/projects/launch").await?;
+
+// Where the space goes, for a storage screen.
+let b = ws.breakdown().await?;
+// b.file_bytes, b.version_bytes, b.trash_bytes,
+// b.by_type: [{ category: "videos", files: 3, bytes: .. }, { category: "images", .. }, ..]
+
+// What to clean up first.
+let biggest = ws.largest_files("/", 10).await?;
+
+// Everything an app stores, and one row per workspace for billing.
+let total = fs.app_usage("my-app").await?;
+let page = fs.usage_report("my-app", None, 1000).await?;
+```
+
+`usage` counts every stored byte once: kept versions and the trash count, and a copy shares its
+original's bytes until it changes. `disk_usage` and `breakdown` count file by file, so a copy
+counts again there. A confined handle's `breakdown` covers only its own folder.
+
 ### Shares
 
 ```rust
@@ -216,6 +252,10 @@ Report vulnerabilities privately: see [SECURITY.md](SECURITY.md).
 Numbers on a Linux server next to its database are higher (here every database round trip pays
 for Docker's network); what matters is the shape.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/nettanvirdev/sysfile3/main/docs/assets/throughput.svg" alt="Operations per second by tool, from 6,127 for stat down to 231 for 4 MiB streamed writes, and small reads against a 40 ms store going from 1,024 per second without the cache to 5,735 with it." width="900">
+</p>
+
 | Tool | ops/s | p50 ms | p99 ms |
 |---|---:|---:|---:|
 | write 1 KiB (new file) | 1,775 | 34 | 107 |
@@ -234,6 +274,9 @@ for Docker's network); what matters is the shape.
 | grep | 2,789 | 22 | 30 |
 | share + open link + read | 1,733 | 36 | 49 |
 | versions | 2,958 | 20 | 30 |
+| usage | 6,089 | 9.7 | 17 |
+| disk_usage (project folder) | 4,636 | 13 | 19 |
+| breakdown (whole workspace) | 660 | 93 | 166 |
 | write_stream 4 MiB | 231 | 137 | 144 |
 
 **Size does not slow a workspace down.** In a workspace of 20,000 files, `stat` and `list` stay

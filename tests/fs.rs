@@ -656,3 +656,63 @@ async fn migrate_twice_is_harmless() {
     let ws = f.ws("u").await;
     ws.write("/x", "y", Default::default()).await.unwrap();
 }
+
+#[tokio::test]
+async fn storage_usage_everywhere() {
+    let f = fixture().await;
+    let ws = f.ws("team-7").await;
+    ws.write("/proj-a/cover.png", vec![1u8; 3000], Default::default()).await.unwrap();
+    ws.write("/proj-a/brief.pdf", vec![2u8; 2000], Default::default()).await.unwrap();
+    ws.write("/proj-a/notes.md", "hello", Default::default()).await.unwrap();
+    ws.write("/proj-b/clip.mp4", vec![3u8; 10_000], Default::default()).await.unwrap();
+    ws.write("/proj-b/backup.zip", vec![4u8; 500], Default::default()).await.unwrap();
+    ws.write("/proj-a/notes.md", "hello again", Default::default()).await.unwrap(); // an old version of 5 bytes
+    ws.copy("/proj-a/cover.png", "/proj-b/cover-copy.png", false).await.unwrap(); // shared bytes
+    ws.write("/old/draft.txt", vec![b'x'; 700], Default::default()).await.unwrap();
+    ws.delete("/old", true).await.unwrap();
+
+    // A project (folder) size, like `du`.
+    let a = ws.disk_usage("/proj-a").await.unwrap();
+    assert_eq!(a, sysfile3::FolderUsage { files: 3, folders: 1, bytes: 3000 + 2000 + 11 });
+    let one = ws.disk_usage("/proj-b/clip.mp4").await.unwrap();
+    assert_eq!((one.files, one.bytes), (1, 10_000));
+    let all = ws.disk_usage("/").await.unwrap();
+    assert_eq!((all.files, all.folders, all.bytes), (6, 2, 3000 + 2000 + 11 + 10_000 + 500 + 3000));
+    assert!(matches!(ws.disk_usage("/nope").await, Err(Error::NotFound(_))));
+
+    // Billed usage counts every kept version and the trash, a copy once.
+    let usage = ws.usage().await.unwrap();
+    let billed = 3000 + 2000 + 5 + 11 + 10_000 + 500 + 700;
+    assert_eq!(usage.used_bytes, billed);
+    assert!(usage.remaining_bytes().is_none() && usage.used_percent().is_none());
+    let usage = f.fs.set_quota("test", "team-7", Some(1024 * 1024), Some(100)).await.unwrap();
+    assert_eq!(usage.remaining_bytes(), Some(1024 * 1024 - billed));
+    assert!((usage.used_mib() - billed as f64 / 1048576.0).abs() < 1e-9);
+    assert!(usage.used_percent().unwrap() > 1.0 && usage.used_percent().unwrap() < 2.0);
+    assert_eq!(usage.remaining_nodes(), Some(100 - usage.node_count));
+
+    // The breakdown: current files, old versions, trash, and by type.
+    let b = ws.breakdown().await.unwrap();
+    assert_eq!((b.files, b.folders, b.file_bytes), (6, 2, all.bytes));
+    assert_eq!((b.old_versions, b.version_bytes), (1, 5));
+    assert_eq!((b.trash_items, b.trashed_files, b.trash_bytes), (1, 1, 700));
+    let types: Vec<_> = b.by_type.iter().map(|t| (t.category.as_str(), t.files, t.bytes)).collect();
+    assert_eq!(
+        types,
+        [("videos", 1, 10_000), ("images", 2, 6000), ("documents", 1, 2000), ("archives", 1, 500), ("text", 1, 11)]
+    );
+
+    // The largest files, to suggest what to clean up.
+    let big: Vec<_> = ws.largest_files("/", 3).await.unwrap().into_iter().map(|e| e.path).collect();
+    assert_eq!(big, ["/proj-b/clip.mp4", "/proj-a/cover.png", "/proj-b/cover-copy.png"]);
+
+    // A confined handle sees only its own folder's numbers.
+    let a_only = f.fs.workspace("test", "team-7", Access::full().within("/proj-a").unwrap()).await.unwrap();
+    let ab = a_only.breakdown().await.unwrap();
+    assert_eq!((ab.files, ab.file_bytes, ab.trash_items), (3, 5011, 0));
+
+    // Across the whole app.
+    f.ws("user-1").await.write("/x", vec![0u8; 100], Default::default()).await.unwrap();
+    let app = f.fs.app_usage("test").await.unwrap();
+    assert_eq!((app.workspaces, app.used_bytes), (2, billed + 100));
+}

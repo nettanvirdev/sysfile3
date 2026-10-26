@@ -32,6 +32,7 @@ mod share;
 mod store;
 mod tree;
 mod upload;
+mod usage;
 mod workspace;
 
 use std::sync::Arc;
@@ -48,6 +49,7 @@ pub use crate::error::{Error, Quota, Result};
 pub use crate::model::*;
 pub use crate::path::{MAX_DEPTH, MAX_NAME_BYTES, MAX_PATH_BYTES, VPath};
 pub use crate::search::GrepOptions;
+pub use crate::usage::category;
 pub use crate::workspace::{EditOutcome, Expect, FileEdits, ListOptions, Workspace, WriteOptions};
 
 use crate::store::Blobs;

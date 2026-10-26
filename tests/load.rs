@@ -273,6 +273,22 @@ async fn every_tool_under_load() {
         .await,
     );
     let w = ws.clone();
+    rows.push(
+        bench("disk_usage (project folder)", 5000, CONCURRENCY, |i| {
+            let w = w.clone();
+            async move { w[i % USERS].disk_usage("/docs").await.map(drop) }
+        })
+        .await,
+    );
+    let w = ws.clone();
+    rows.push(
+        bench("breakdown (whole workspace)", 3000, CONCURRENCY, |i| {
+            let w = w.clone();
+            async move { w[i % USERS].breakdown().await.map(drop) }
+        })
+        .await,
+    );
+    let w = ws.clone();
     let chunk = Bytes::from(vec![9u8; 256 * 1024]);
     rows.push(
         bench("write_stream 4 MiB", 200, 32, |i| {

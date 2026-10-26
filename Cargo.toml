@@ -1,6 +1,6 @@
 [package]
 name = "sysfile3"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 rust-version = "1.88"
 description = "A multi-tenant virtual file system for AI agents: Postgres for the tree, S3-compatible storage for the bytes"
@@ -9,7 +9,7 @@ repository = "https://github.com/nettanvirdev/sysfile3"
 readme = "README.md"
 keywords = ["filesystem", "ai-agents", "s3", "postgres", "multi-tenant"]
 categories = ["filesystem", "database", "asynchronous"]
-exclude = [".github/", "tests/"]
+exclude = [".github/", "tests/", "docs/assets/", "rustfmt.toml"]
 
 [dependencies]
 bytes = "1.12.1"
