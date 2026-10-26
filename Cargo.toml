@@ -1,0 +1,38 @@
+[package]
+name = "sysfile3"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "A multi-tenant virtual file system for AI agents: Postgres for the tree, S3-compatible storage for the bytes"
+license = "MIT"
+repository = "https://github.com/nettanvirdev/sysfile3"
+readme = "README.md"
+keywords = ["filesystem", "ai-agents", "s3", "postgres", "multi-tenant"]
+categories = ["filesystem", "database", "asynchronous"]
+exclude = [".github/", "tests/"]
+
+[dependencies]
+bytes = "1.12.1"
+chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
+futures = "0.3.34"
+globset = "0.4.20"
+hex = "0.4.3"
+mime_guess = "2.0.5"
+moka = { version = "0.12.16", features = ["future"] }
+object_store = { version = "0.14.2", features = ["aws"] }
+regex = "1.13.1"
+sha2 = "0.11.1"
+sqlx = { version = "0.9.0", default-features = false, features = ["runtime-tokio", "tls-rustls", "postgres", "uuid", "chrono", "migrate", "derive"] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["rt-multi-thread", "macros", "sync", "time"] }
+unicode-normalization = "0.1.26"
+uuid = { version = "1.29.0", features = ["v4", "v7"] }
+
+[dev-dependencies]
+async-trait = "0.1.92"
+object_store = { version = "0.14.2", features = ["aws"] }
+tokio = { version = "1.54.1", features = ["full"] }
+
+[lints.clippy]
+# sqlx row tuples are clearer inline than behind type aliases.
+type_complexity = "allow"
