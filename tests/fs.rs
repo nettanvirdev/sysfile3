@@ -724,7 +724,9 @@ async fn stored_objects_carry_their_content_type() {
     let ws = f.ws("u1").await;
     ws.write("/clip.mp4", Bytes::from_static(b"mp4"), Default::default()).await.unwrap();
     let chunks = stream::iter([Ok::<_, std::io::Error>(Bytes::from_static(b"png"))]);
-    ws.write_stream("/pic.png", chunks, WriteOptions { mime: Some("image/png".into()), ..Default::default() }).await.unwrap();
+    ws.write_stream("/pic.png", chunks, WriteOptions { mime: Some("image/png".into()), ..Default::default() })
+        .await
+        .unwrap();
     let all: Vec<_> = f.store.list(None).try_collect().await.unwrap();
     let mut types = Vec::new();
     for meta in all {
