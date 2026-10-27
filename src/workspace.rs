@@ -395,7 +395,8 @@ impl Workspace {
             return Err(Error::TooLarge { size, limit });
         }
         self.precheck(&abs, size).await?;
-        let stored = self.inner.blobs.put(self.id, data).await?;
+        let mime = opts.mime.clone().unwrap_or_else(|| guess_mime(&abs));
+        let stored = self.inner.blobs.put(self.id, data, &mime).await?;
         let pending = Pending { abs, content: Content::New(stored), mime: opts.mime, expect: opts.expect };
         Ok(self.commit(vec![pending]).await?.remove(0))
     }
@@ -441,7 +442,7 @@ impl Workspace {
                     if size > self.inner.cfg.max_text_bytes {
                         return Err(Error::TooLarge { size, limit: self.inner.cfg.max_text_bytes });
                     }
-                    let stored = self.inner.blobs.put(self.id, Bytes::from(new_text)).await?;
+                    let stored = self.inner.blobs.put(self.id, Bytes::from(new_text), &guess_mime(abs)).await?;
                     pending.push(Pending {
                         abs: abs.clone(),
                         content: Content::New(stored),

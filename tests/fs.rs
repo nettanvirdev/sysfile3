@@ -716,3 +716,22 @@ async fn storage_usage_everywhere() {
     let app = f.fs.app_usage("test").await.unwrap();
     assert_eq!((app.workspaces, app.used_bytes), (2, billed + 100));
 }
+
+#[tokio::test]
+async fn stored_objects_carry_their_content_type() {
+    use object_store::{Attribute, ObjectStore, ObjectStoreExt};
+    let f = fixture().await;
+    let ws = f.ws("u1").await;
+    ws.write("/clip.mp4", Bytes::from_static(b"mp4"), Default::default()).await.unwrap();
+    let chunks = stream::iter([Ok::<_, std::io::Error>(Bytes::from_static(b"png"))]);
+    ws.write_stream("/pic.png", chunks, WriteOptions { mime: Some("image/png".into()), ..Default::default() }).await.unwrap();
+    let all: Vec<_> = f.store.list(None).try_collect().await.unwrap();
+    let mut types = Vec::new();
+    for meta in all {
+        let got = f.store.get(&meta.location).await.unwrap();
+        types.push(got.attributes.get(&Attribute::ContentType).map(|v| v.to_string()).unwrap_or_default());
+    }
+    types.sort();
+    // A signed download link then serves each file as what it is.
+    assert_eq!(types, ["image/png", "video/mp4"]);
+}

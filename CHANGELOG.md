@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+
+- Stored objects carry the file's media type as their `Content-Type`, so a `download_url` link
+  serves a video as a video (it plays) instead of `application/octet-stream`.
+
 ## 0.2.1
 
 - A step-by-step guide to every feature (`docs/guide.md`) and a runnable tour of all of it

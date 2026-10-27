@@ -25,7 +25,8 @@ impl Workspace {
         let usage = self.usage().await?;
         let max = self.inner.cfg.max_file_bytes;
         let room = usage.quota_bytes.map(|q| q.saturating_sub(usage.used_bytes)).unwrap_or(u64::MAX);
-        let stored = match self.inner.blobs.put_stream(self.id, input, max.min(room)).await {
+        let mime = opts.mime.clone().unwrap_or_else(|| crate::workspace::guess_mime(&abs));
+        let stored = match self.inner.blobs.put_stream(self.id, input, max.min(room), &mime).await {
             Err(Error::TooLarge { .. }) if room < max => return Err(Error::QuotaExceeded(Quota::Bytes)),
             other => other?,
         };

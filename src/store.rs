@@ -14,7 +14,9 @@ use futures::stream::{self, BoxStream, Stream, StreamExt, TryStreamExt};
 use moka::future::Cache;
 use object_store::path::Path;
 use object_store::signer::{Method, Signer};
-use object_store::{ObjectStore, ObjectStoreExt, PutPayload, WriteMultipart};
+use object_store::{
+    Attribute, Attributes, ObjectStore, ObjectStoreExt, PutMultipartOptions, PutOptions, PutPayload, WriteMultipart,
+};
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
@@ -75,11 +77,14 @@ impl Blobs {
         Some((ws.parse().ok()?, blob.parse().ok()?))
     }
 
-    pub async fn put(&self, ws: Uuid, bytes: Bytes) -> Result<Stored> {
+    /// Stores `bytes` as a new blob. `mime` becomes the object's `Content-Type`, so a signed
+    /// download link serves the file as what it is (a video plays instead of downloading).
+    pub async fn put(&self, ws: Uuid, bytes: Bytes, mime: &str) -> Result<Stored> {
         let id = Uuid::now_v7();
         let sha256 = Sha256::digest(&bytes).to_vec();
         let size = bytes.len() as u64;
-        self.store.put(&self.key(ws, id), PutPayload::from(bytes.clone())).await?;
+        let opts = PutOptions { attributes: content_type(mime), ..Default::default() };
+        self.store.put_opts(&self.key(ws, id), PutPayload::from(bytes.clone()), opts).await?;
         if size <= self.cache_item_bytes {
             self.cache.insert(id, bytes).await;
         }
@@ -87,13 +92,14 @@ impl Blobs {
     }
 
     /// Stream into a multipart upload, refusing more than `limit` bytes. Nothing is left behind
-    /// in storage when the stream fails or runs over.
-    pub async fn put_stream<S>(&self, ws: Uuid, mut input: S, limit: u64) -> Result<Stored>
+    /// in storage when the stream fails or runs over. `mime` is the object's `Content-Type`.
+    pub async fn put_stream<S>(&self, ws: Uuid, mut input: S, limit: u64, mime: &str) -> Result<Stored>
     where
         S: Stream<Item = std::io::Result<Bytes>> + Unpin + Send,
     {
         let id = Uuid::now_v7();
-        let upload = self.store.put_multipart(&self.key(ws, id)).await?;
+        let opts = PutMultipartOptions { attributes: content_type(mime), ..Default::default() };
+        let upload = self.store.put_multipart_opts(&self.key(ws, id), opts).await?;
         let mut writer = WriteMultipart::new(upload);
         let mut hasher = Sha256::new();
         let mut size: u64 = 0;
@@ -179,4 +185,10 @@ impl Blobs {
         let signer = self.signer.as_ref().ok_or(Error::Unsupported("signed URLs need a signer"))?;
         Ok(signer.signed_url(method, &self.key(ws, blob), ttl).await?.to_string())
     }
+}
+
+fn content_type(mime: &str) -> Attributes {
+    let mut attributes = Attributes::new();
+    attributes.insert(Attribute::ContentType, mime.to_owned().into());
+    attributes
 }
